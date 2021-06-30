@@ -4,9 +4,9 @@
 --(56건)
 SELECT  COUNT(salary)
 FROM    employees
-where   (select avg(salary)
-         from   employees
-        ) > salary;
+where   salary < (select avg(salary)
+         		  from   employees
+        		 ) ;
         
 --문제2.평균급여 이상, 최대급여 이하의 월급을 받는 사원의 
 --직원번호(employee_id), 이름(first_name), 급여(salary),
@@ -28,15 +28,21 @@ order by salary asc;
 --도시아이디(location_id), 거리명(street_address), 우편번호(postal_code), 도시명(city),
 --주(state_province), 나라아이디(country_id) 를 출력하세요
 --(1건)
-SELECT  d.location_id, l.street_address,
-        l.postal_code, l.city,
-        l.state_province, l.country_id
-        
-FROM    employees e, departments d, locations l
-where   e.department_id = d.department_id
-and     d.location_id = l.location_id
-and     e.first_name like 'Steven'
-and     e.last_name like 'King';
+select  sk.location_id 도시아이디,
+        street_address 거리명,
+        postal_code 우편번호,
+        city 도시명,
+        state_province 주,
+        country_id 나라아이디
+from locations lo, (select  em.first_name,
+                            em.last_name,
+                            de.department_id,
+                            de.location_id
+                    from employees em, departments de
+                    where em.department_id = de.department_id
+                    and first_name = 'Steven'
+                    and last_name = 'King')  sk
+where sk.location_id = lo.location_id;
 
 --문제4.job_id 가 'ST_MAN' 인 직원의 급여보다 작은 직원의 사번,이름,급여를 급여의 내림차순으로 출력하세요  -ANY연산자 사용
 --(74건)
@@ -46,8 +52,9 @@ SELECT  employee_id,
 FROM    employees
 where   salary < any  (select   max(salary)
                        from     employees
-                       where    job_id like 'ST_MAN'
-                       );
+                       where    job_id = 'ST_MAN'
+                       )
+order by salary desc;
         
 --문제5.각 부서별로 최고의 급여를 받는 사원의 직원번호(employee_id),
 --이름(first_name)과 급여(salary) 부서번호(department_id)를 조회하세요 
@@ -104,16 +111,16 @@ where   e.department_id = a.department_id
 and     e.salary > a.salary;
 
 --문제8.직원 입사일이 11번째에서 15번째의 직원의 사번, 이름, 급여, 입사일을 입사일 순서로 출력하세요
-select rn,
-       employee_id, first_name,
-       salary, hire_date
+select orn.rn,
+       orn.employee_id, orn.first_name,
+       orn.salary, orn.hire_date
 from(select rownum rn,
-            employee_id, first_name,
-            salary, hire_date
+            ot.employee_id, ot.first_name,
+            ot.salary, ot.hire_date
      from(SELECT  employee_id, first_name,
                 salary, hire_date
          FROM    employees
-         order by hire_date asc)
-    )
+         order by hire_date asc) ot
+    ) orn
 where rn >= 11
 and   rn <= 15;
