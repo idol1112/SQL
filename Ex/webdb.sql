@@ -2,6 +2,10 @@
 drop table book;
 drop table author;
 
+--시퀀스 삭제
+drop sequence seq_book_id;
+drop sequence seq_author_id;
+
 --author 테이블 생성
 create table author(
     author_id   NUMBER(10),
